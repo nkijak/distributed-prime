@@ -2,6 +2,7 @@ doctype 5
 html(lang="en")
     head
         title= 'Primordial'
+        link(rel='stylesheets', href='/stylesheets/style.css')
         script(type='text/javascript',src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
         script(type='text/javascript',src='javascripts/primordial.js')
     body
@@ -16,6 +17,11 @@ html(lang="en")
                         console.log('being yielded the floor...');
                         $('#status').text(result.number + " is " + (result.isPrime?"":"not ") + "prime.");
                     });
+                    primordial.handlers({
+                        finish: function() {
+                            $('#status').text("Computation complete");
+                        }
+                   });
                 });
                 function go() {
                     primordial.next();

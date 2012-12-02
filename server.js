@@ -1,15 +1,23 @@
+function CUTOFF_VALUE() { return 1000000; }
+
 var express = require('express'),
-    path    = require('path');
+    path    = require('path'),
+	cons    = require('consolidate'),
+	redis 	= require('redis').createClient();
 var app = express();
 
-var redis = require('redis').createClient();
-
-var cons = require('consolidate');
-app.engine('html', cons.jade);
-
-app.set('view engine', 'jade');
-app.set('views', __dirname + '/views');
-app.use(express.static(path.join(__dirname, 'public')));
+app.configure(function(){
+  app.set('port', process.env.PORT || 3000);
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'jade');
+  app.use(express.favicon());
+  app.use(express.logger('dev'));
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+  app.use(app.router);
+  app.use(require('stylus').middleware(__dirname + '/public'));
+  app.use(express.static(path.join(__dirname, 'public')));
+});
 
 app.get('/', function(req, res) {
     res.render('index');
@@ -17,11 +25,30 @@ app.get('/', function(req, res) {
 
 app.get('/number', function(req, res) {
     redis.incr('current-number', function(err, currentNumber) {
-        var object = {'number':currentNumber};
-        var body = JSON.stringify(object);
-        res.setHeader('Content-Type', 'application/json');
-        res.send(body);
+		if (currentNumber > CUTOFF_VALUE()) {
+			res.writeHead(503);
+			res.end();
+		} else {
+			var object = {'number':currentNumber};
+			var body = JSON.stringify(object);
+			res.setHeader('Content-Type', 'application/json');
+			res.send(body);
+		}
     });
+});
+
+app.get('/stats', function(req, res) {
+	res.setHeader('Content-Type', 'application/json');
+	res.send(JSON.stringify({'status':'complete'}));
+});
+
+app.post('/number', function(req, res) {
+	console.log(req.body);
+	if (req.body.isPrime) {
+		redis.zadd("prime-number", req.body.number, req.body.number);
+	}
+	res.writeHead(204);
+	res.end();
 });
 
 app.listen(3010);
