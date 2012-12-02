@@ -2,28 +2,69 @@ doctype 5
 html(lang="en")
     head
         title= 'Primordial'
-        link(rel='stylesheets', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/style.css')
         script(type='text/javascript',src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
         script(type='text/javascript',src='javascripts/primordial.js')
     body
         #content
             h1 Primordial
-            button#action(onclick='go()') Go!
+            .row
+                .boxen
+                    button#action(onclick='go()') Go!
+                .boxen
+                    h4 Local Primes Found
+                    ul#primes
             span#status
             script(type='text/javascript')
+                var lastPublishedStats = {};
                 $(function() {
                     console.log("Setting primordial's yield function");
                     primordial.yieldTo(function(result) {
-                        console.log('being yielded the floor...');
+                        stats.log(result);
+                        if (result.isPrime) {
+                            $('#primes').append("<li>"+result.number+"</li>");
+                        }
                         $('#status').text(result.number + " is " + (result.isPrime?"":"not ") + "prime.");
                     });
                     primordial.handlers({
                         finish: function() {
-                            $('#status').text("Computation complete");
+                            stats.end(function(event) {
+                                console.log(event.data);
+                                lastPublishedStats = event.data;
+                                var delta = event.data.end - event.data.start;
+                                var s = Math.floor(delta/1000);
+                                var m = Math.floor(s/60);
+                                var h = Math.floor(m/60);
+                                $('#status').text("Computation complete in "+h+":"+m+":"+s);
+                            });
+                            
                         }
                    });
                 });
+
+                var stats = (function(){
+                    var worker = new Worker('javascripts/statsCalculatorTask.js');
+                   
+                    return {
+                        start: function() {
+                            worker.postMessage({'operation':'start'});
+                            console.log("After Start %o", worker);
+                        },
+                        end: function(dataHandler) {
+                            worker.addEventListener('message', dataHandler);
+                            worker.postMessage({'operation':'stop'});
+                            console.log("After end %o", worker);
+                        },
+                        log: function(data) {
+                            worker.postMessage({'operation':'log',
+                                                'data' : data});
+                            console.log("After log %o", worker);
+                        }
+                    }
+                })();
+
                 function go() {
+                    stats.start(); 
                     primordial.next();
-                    $('#action').remove();
+                    $('#action').attr("disabled","disabled");
                 }

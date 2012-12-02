@@ -24,14 +24,11 @@ var primordial = (function() {
     }
 
     function calculate(number) {
-        console.log("Being asked to calculate on %d", number);
         worker.postMessage(number);
     }
     
     worker.addEventListener('message', function(e) {
         var result = e.data;
-        console.log("message received %o", e);
-        console.log("%d is prime? %s", result.number, result.isPrime);
         results.push(result);        
         yield(result);
         reportResult(result, next);

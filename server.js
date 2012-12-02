@@ -45,7 +45,7 @@ app.get('/stats', function(req, res) {
 app.post('/number', function(req, res) {
 	console.log(req.body);
 	if (req.body.isPrime) {
-		redis.zadd("prime-number", req.body.number, req.body.number);
+		redis.zadd("prime-number", new Date().getTime(), req.body.number);
 	}
 	res.writeHead(204);
 	res.end();
