@@ -32,7 +32,6 @@ html(lang="en")
                     ]);
 
                     chart = drawCharts();
-                    chartUpdateIntervalId = setInterval("updateCharts()", 1000);
                     console.log("Setting primordial's yield function");
                     primordial.yieldTo(function(result) {
                         stats.log(result);
@@ -58,7 +57,7 @@ html(lang="en")
                 function statsUpdate(event) {
                     lastPublishedStats = event.data;
                     var secondsSinceStart = lastPublishedStats.thresholds.all.length;
-                    var numPerSec = lastPublishedStats.thresholds.all[secondsSinceStart-1];
+                    var numPerSec = lastPublishedStats.thresholds.all[Math.max(secondsSinceStart-2,0)];
                     var avg = Math.round(lastPublishedStats.count/secondsSinceStart);
                     console.log("Processing %d numbers per second", numPerSec);
                     console.log("Processing on average %d numbers per second", numPerSec);
@@ -92,6 +91,7 @@ html(lang="en")
                     primordial.start();
                     $('#action').attr("disabled","disabled");
                     $('#stop').removeAttr("disabled");
+                    chartUpdateIntervalId = setInterval("updateCharts()", 1000);
                 }
 
                 function stop() {
@@ -104,7 +104,7 @@ html(lang="en")
 
                 function drawCharts() {
                     var options = {
-                        width: 400, height: 120,
+                        width: 400, height: 200,
                         minorTicks: 5
                     };
                     var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
@@ -114,8 +114,8 @@ html(lang="en")
 
                 function updateCharts() {
                     chart.draw(chartData,{
-                        width: 400, height: 120,
-                        minorTicks: 5,
+                        width: 400, height: 200,
+                        minorTicks: 5
                     });
                 }
 
