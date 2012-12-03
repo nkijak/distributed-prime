@@ -3,6 +3,7 @@ var primordial = (function() {
     var results = [];
     var options = {};
     var yield = function(){};
+    var keepGoing = true;
 
     function fetchNumber(err, callback) {
         $.ajax('/number', {
@@ -34,12 +35,19 @@ var primordial = (function() {
         reportResult(result, next);
     });
 
-    function next() {fetchNumber(options.finish||function(){}, calculate); }
+    function next() {
+        if (!keepGoing) options.finish();        
+        else fetchNumber(options.finish||function(){}, calculate);
+    }
 
+    function stop() { keepGoing = false; }
+    function start() { keepGoing = true; next(); }
     return {
         next: next,
         results: results,
         yieldTo: function(callback) { yield = callback; },
-        handlers: function(handlers) { options = handlers; }
+        handlers: function(handlers) { options = handlers; },
+        stop: stop,
+        start: start
     };
 })();

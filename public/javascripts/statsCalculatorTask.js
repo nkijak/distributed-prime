@@ -44,8 +44,11 @@ function log(data) {
     if (data.isPrime) {
         fill(stats.thresholds.primes, bucket, 0);
         stats.thresholds.primes[bucket]+=1;
+        stats.primes.push(data.number);
     }
+    stats.lastNumberAt = now;
     stats.count+=1;
+    self.postMessage(stats);
 }
 
 function fill(array, newLength, fillValue) {

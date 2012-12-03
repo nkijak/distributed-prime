@@ -5,46 +5,70 @@ html(lang="en")
         link(rel='stylesheet', href='/stylesheets/style.css')
         script(type='text/javascript',src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
         script(type='text/javascript',src='javascripts/primordial.js')
+        script(type='text/javascript',src='https://www.google.com/jsapi')
     body
         #content
             h1 Primordial
             .row
                 .boxen
                     button#action(onclick='go()') Go!
+                    button#stop(onclick='stop()',disabled="disabled") Stop!
                 .boxen
                     h4 Local Primes Found
                     ul#primes
+                div#chart_div.boxen
             span#status
             script(type='text/javascript')
+                var chart;
+                google.load('visualization', '1', {packages:['gauge']});
+                var chartUpdateIntervalId; 
                 var lastPublishedStats = {};
+                var chartData; 
                 $(function() {
+                    chartData = google.visualization.arrayToDataTable([
+                        ['meter', 'value'],
+                        ['Processed/Sec.', 0],
+                        ['Avg. Proc', 0]
+                    ]);
+
+                    chart = drawCharts();
+                    chartUpdateIntervalId = setInterval("updateCharts()", 1000);
                     console.log("Setting primordial's yield function");
                     primordial.yieldTo(function(result) {
                         stats.log(result);
                         if (result.isPrime) {
-                            $('#primes').append("<li>"+result.number+"</li>");
+                           addPrime(result.number); 
                         }
                         $('#status').text(result.number + " is " + (result.isPrime?"":"not ") + "prime.");
                     });
                     primordial.handlers({
                         finish: function() {
                             stats.end(function(event) {
-                                console.log(event.data);
-                                lastPublishedStats = event.data;
                                 var delta = event.data.end - event.data.start;
-                                var s = Math.floor(delta/1000);
+                                var s = Math.round(delta/1000);
                                 var m = Math.floor(s/60);
                                 var h = Math.floor(m/60);
-                                $('#status').text("Computation complete in "+h+":"+m+":"+s);
+                                $('#status').text("Computation complete in "+h+":"+(m%60)+":"+(s%60));
                             });
                             
                         }
                    });
                 });
+                
+                function statsUpdate(event) {
+                    lastPublishedStats = event.data;
+                    var secondsSinceStart = lastPublishedStats.thresholds.all.length;
+                    var numPerSec = lastPublishedStats.thresholds.all[secondsSinceStart-1];
+                    var avg = Math.round(lastPublishedStats.count/secondsSinceStart);
+                    console.log("Processing %d numbers per second", numPerSec);
+                    console.log("Processing on average %d numbers per second", numPerSec);
+                    chartData.setValue(0,1,numPerSec);
+                    chartData.setValue(1,1,avg);
+                }
 
                 var stats = (function(){
                     var worker = new Worker('javascripts/statsCalculatorTask.js');
-                   
+                    worker.addEventListener('message', statsUpdate);
                     return {
                         start: function() {
                             worker.postMessage({'operation':'start'});
@@ -65,6 +89,41 @@ html(lang="en")
 
                 function go() {
                     stats.start(); 
-                    primordial.next();
+                    primordial.start();
                     $('#action').attr("disabled","disabled");
+                    $('#stop').removeAttr("disabled");
+                }
+
+                function stop() {
+                    $('#stop').attr("disabled","disabled");
+                    $('#action').removeAttr("disabled");
+                    primordial.stop();
+                    stats.end();
+                    clearInterval(chartUpdateIntervalId);
+                }
+
+                function drawCharts() {
+                    var options = {
+                        width: 400, height: 120,
+                        minorTicks: 5
+                    };
+                    var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+                    chart.draw(chartData, options);
+                    return chart;
+                }
+
+                function updateCharts() {
+                    chart.draw(chartData,{
+                        width: 400, height: 120,
+                        minorTicks: 5,
+                    });
+                }
+
+
+                function addPrime(number) {
+                    var children = $('#primes').children();
+                    if (children.length >= 5) {
+                        children.first().remove();
+                    }
+                    $('#primes').append("<li>"+number+"</li>");
                 }
