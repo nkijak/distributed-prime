@@ -4,7 +4,8 @@ var express = require('express'),
     path    = require('path'),
 	cons    = require('consolidate'),
 	redis 	= require('redis').createClient(),
-	uuid	= require('node-uuid');
+	uuid	= require('node-uuid'),
+    model   = require('./model.js');
 var app = express();
 // Socket.io setup
 var httpServer = require('http').createServer(app),
@@ -38,18 +39,14 @@ app.get('/', function(req, res) {
 });
 
 app.get('/number', function(req, res) {
-    redis.incr('current-number', function(err1, currentNumber) {
-		redis.hset('user-numbers', req.userId, currentNumber, function(err2, reply) {
-			if (currentNumber > CUTOFF_VALUE()) {
-				res.writeHead(503);
-				res.end();
-			} else {
-				var object = {'number':currentNumber};
-				var body = JSON.stringify(object);
-				res.setHeader('Content-Type', 'application/json');
-				res.send(body);
-			}
-		});
+    model.nextNumber(req.userId, function success(currentNumber) {
+        var object = {'number':currentNumber};
+        var body = JSON.stringify(object);
+        res.setHeader('Content-Type', 'application/json');
+        res.send(body);
+    },function failure() {
+        res.writeHead(503);
+        res.end();
     });
 });
 
@@ -69,6 +66,15 @@ app.post('/number', function(req, res) {
 		res.end();
 	});
 });
+
+//======== socket.io =========
+io.sockets.on('connection', function(socket) {
+    socket.on('get-number', function(data) {
+        console.log(socket, data);
+    });
+});
+
+
 
 app.listen(3010);
 console.log("Listening on port 3010");
