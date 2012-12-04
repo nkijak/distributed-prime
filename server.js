@@ -6,6 +6,9 @@ var express = require('express'),
 	redis 	= require('redis').createClient(),
 	uuid	= require('node-uuid');
 var app = express();
+// Socket.io setup
+var httpServer = require('http').createServer(app),
+    io         = require('socket.io').listen(httpServer);
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
