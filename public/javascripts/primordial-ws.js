@@ -5,11 +5,6 @@ var primordial = (function() {
     var yield = function(){};
     var keepGoing = true;
 
-    var socket = io.connect();
-    socket.on('number', function(data) {
-        callback(data.number);
-    });
-
     function fetchNumber(err, callback) {
         $.ajax('/number', {
             dataType:'json',

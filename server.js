@@ -74,7 +74,5 @@ io.sockets.on('connection', function(socket) {
     });
 });
 
-
-
-app.listen(3010);
+httpServer.listen(3010);
 console.log("Listening on port 3010");
