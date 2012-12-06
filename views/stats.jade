@@ -1,0 +1,80 @@
+doctype 5
+html(lang="en")
+    head
+        title= 'Primordial Stats'
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script(type='text/javascript',src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
+        script(type='text/javascript',src='https://www.google.com/jsapi')
+        script(type='text/javascript',src='/socket.io/socket.io.js')
+    body
+        #content
+            h1 Control Room
+            h4 Performance
+            table#total
+                thead
+                    th Clients
+                    th Num. Last Sec
+                    th Avg. Num Processed
+                    th Total Primes Found
+                    th Time
+                tbody
+                    tr
+                        td 0
+                        td 0
+                        td 0
+                        td 0
+                        td 0:0:0
+            .row
+                .boxen
+                    button#start(onclick='start()') Start
+                    button#stop(onclick='stop()') Stop
+                .boxen
+                    h4 clients
+                    table#clients
+                        thead
+                            th Client ID
+                            th Num. Last Sec
+                            th Avg. Num Processed
+                            th Total Primes Found
+                            th Time
+                        tbody
+        script(type='text/javascript')
+            var stats = [0,0,0,0,0];
+            $(function() {
+                var socket = io.connect('http://localhost/monitor');
+                socket.on('clients', function(stats) {
+                    updateStats(stats);
+                });
+                socket.on('new-client', function(client){
+                    addClient(client);
+                });
+            });
+
+
+            function updateStats(clients) {
+                console.log(clients);
+                for (id in clients) {
+                    var client = clients[id];
+                    addClient(client);
+                }
+                updateTotals();
+            }
+            function addClient(client) {
+                var clientsTable = $('#clients>tbody');
+                stats[0]+=1;
+                if (!client || !client.performance) return;
+                stats[1]+=client.performance.perSec;
+                
+                clientsTable.append("<tr><td>"+client.id+"</td>"+
+                                    "<td>"+client.performance.perSec+"</td>"+
+                                    "<td>"+client.performance.avg+"</td>"+
+                                    "<td>"+0+"</td>"+
+                                    "<td>"+0+"</td>");
+                updateTotals();
+            }
+            function updateTotals(){
+                $('#total>tbody>tr').replaceWith('<tr>'+stats.map(function(stat){
+                    return '<td>'+stat+'</td>';
+                }).join('')+'</tr>');
+            }
+

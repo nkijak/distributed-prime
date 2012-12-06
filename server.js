@@ -1,15 +1,15 @@
-function CUTOFF_VALUE() { return 1000000; }
-
 var express = require('express'),
     path    = require('path'),
 	cons    = require('consolidate'),
-	redis 	= require('redis').createClient(),
 	uuid	= require('node-uuid'),
-    model   = require('./model.js');
+    model   = require('./model.js'),
+	monitor = require('./monitor.js');
 var app = express();
 // Socket.io setup
 var httpServer = require('http').createServer(app),
     io         = require('socket.io').listen(httpServer);
+
+monitor.createSocket(io);
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -51,17 +51,11 @@ app.get('/number', function(req, res) {
 });
 
 app.get('/stats', function(req, res) {
-	res.setHeader('Content-Type', 'application/json');
-	res.send(JSON.stringify({'status':'complete'}));
+	res.render('stats');
 });
 
 app.post('/number', function(req, res) {
-	redis.hdel('user-numbers', req.userId, function(err3, count) {
-		redis.zadd(req.userId+"-processed", Date.now(), req.body.number);
-		if (req.body.isPrime) {
-			redis.zadd("prime-number", Date.now(), req.body.number);
-			redis.zadd(req.userId+"-primes", Date.now(), req.body.number);
-		}
+	model.saveResults(req.userId, req.body, function() {
 		res.writeHead(204);
 		res.end();
 	});
@@ -69,10 +63,29 @@ app.post('/number', function(req, res) {
 
 //======== socket.io =========
 io.sockets.on('connection', function(socket) {
-    socket.on('get-number', function(data) {
-        console.log(socket, data);
+	socket.on('id', function(data) {
+		console.log("registration, id = %s", data.id);
+		socket.set('userId', data.id, function(){
+			monitor.newClient(data.id);
+			socket.emit('ready');	
+		});
+	});
+    socket.on('next-number', function(data) {
+		socket.get('userId', function (err, userId) {
+			model.nextNumber(userId, function success(currentNumber) {
+				socket.emit('next-number', {'number':currentNumber});
+			}, function failure() {
+				socket.emit('complete');
+			});
+		});
     });
+	socket.on('number', function(data) {
+		socket.get('userId',function(err, userId) {
+			model.saveResults(userId, data, function() {});
+		});
+	});
 });
+
 
 httpServer.listen(3010);
 console.log("Listening on port 3010");

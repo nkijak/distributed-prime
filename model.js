@@ -12,3 +12,15 @@ exports.nextNumber = function(userId, success, failure) {
 		});
     });
  };
+
+exports.saveResults = function(userId, result, callback) {
+	redis.hdel('user-numbers', userId, function(err3, countDeleted) {
+		redis.zadd(userId+"-processed", Date.now(), result.number);
+		if (result.isPrime) {
+			redis.zadd("prime-number", Date.now(), result.number);
+			redis.zadd(userId+"-primes", Date.now(), result.number);
+		}
+        callback();
+	});
+};
+
