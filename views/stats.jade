@@ -48,6 +48,12 @@ html(lang="en")
                 socket.on('new-client', function(client){
                     addClient(client);
                 });
+                socket.on('computation', function(systemStats){
+                    stats[0] = systemStats.clients;
+                    stats[2] = systemStats.numProcessed;
+                    stats[3] = systemStats.primesFound;
+                    updateTotals();
+                });
             });
 
 

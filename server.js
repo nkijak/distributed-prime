@@ -2,7 +2,7 @@ var express = require('express'),
     path    = require('path'),
 	cons    = require('consolidate'),
 	uuid	= require('node-uuid'),
-    model   = require('./model.js'),
+    model   = require('./model.js').Service,
 	monitor = require('./monitor.js');
 var app = express();
 // Socket.io setup
@@ -79,7 +79,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		});
     });
-	socket.on('number', function(data) {
+	socket.on('result', function(data) {
 		socket.get('userId',function(err, userId) {
 			model.saveResults(userId, data, function() {});
 		});
