@@ -1,0 +1,48 @@
+<h1>Control Room</h1>
+<h4>Performance</h4>
+<table id="total">
+    <thead>
+        <th>Clients</th>
+        <th>No. Last Sec</th>
+        <th>Avg. Num Processed</th>
+        <th>Total Primes Found</th>
+        <th>Time</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{stats.clients}}</td>
+            <td>n/a</td>
+            <td>{{stats.numProcessed}}</td>
+            <td>{{stats.primesFound}}</td>
+            <td>n/a</td>
+            <td>?:?:?</td>
+        </tr>
+    </tbody>
+</table>
+<div class="row">
+    <div class="boxen">
+        <button id="start" ng-click="start()">Start</button>
+        <button id="stop" ng-click="stop()">Stop</button>
+    </div>
+    <div class="boxen">
+        <h4>Clients</h4>
+        <table id="total">
+            <thead>
+                <th>Client ID</th>
+                <th>Num. Last Sec</th>
+                <th>Avg. Num Processed</th>
+                <th>Total Primes Found</th>
+                <th>Time</th>
+            </thead>
+            <tbody>
+                <tr ng-repeat="client in clients">
+                    <td>{{client.id}}</td>
+                    <td>{{client.performance.perSec}}</td>
+                    <td>{{client.performance.avg}}</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

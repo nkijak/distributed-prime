@@ -13,3 +13,9 @@ http://localhost:3010
 
 click "Go!"
 
+### Networking spec
+GET /number
+{'number': [Number]}
+
+POST /number
+{'number': [Number], 'isPrime':[true|false]}

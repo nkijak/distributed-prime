@@ -1,0 +1,22 @@
+<!DOCTYPE html> 
+<html data-ng-app="myApp">
+  <head>
+    <title>AngularJS Primordial</title>
+    <link rel="stylesheet" type="text/css" href="./assets/app.css" />
+  </head>
+
+  <body>
+    <div id="wrapper">
+      <header>Header</header>
+      <main id="view-container">
+        <a href="#/">Primordial</a>
+        <a href="#/stats">Server Stats</a>
+        <div data-ng-view></div>
+      </main>
+      <footer>Footer</footer>
+    </div>
+    <script src="./assets/app.js"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="//localhost:7777/livereload.js"></script>
+  </body>
+</html>

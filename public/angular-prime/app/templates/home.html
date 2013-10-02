@@ -1,0 +1,17 @@
+<div id="content">
+    <h1>Primordial</h1>
+    <div class=".row">
+        <div class="boxen">
+            <button id="action" ng-click='go()' ng-disabled="running">Go!</button>
+            <button id="stop" ng-click='stop()' ng-disabled="!running">Stop!</button>
+        </div>
+        <div class="boxen">
+            <h4>Local Primes Found</h4>
+            <ul id="primes" ng-repeat="prime in primes">
+                <li>{{prime}}</li>
+            </ul>
+        </div>
+        <div id="chart_div" class="boxen" />
+        <span>{{status}}</span>
+    </div>
+</div>

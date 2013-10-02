@@ -1,0 +1,20 @@
+body {
+  padding: 20px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+#content {
+  margin: auto;
+  width: 90%;
+}
+.row {
+  display: -webkit-box;
+  display: -mox-box;
+  display: box;
+}
+.boxen {
+  box-flex: 1;
+  border: 1px solid #000;
+}
+h1 {
+  text-align: center;
+}
