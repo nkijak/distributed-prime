@@ -5,10 +5,7 @@ module.exports = function(config) {
       '../lib/angular-1.2.0-rc.2/angular-route.js',
       '../lib/angular-1.2.0-rc.2/angular-mocks.js',
       '../lib/angular-1.2.0-rc.2/angular-resource.js',
-      'scripts/homePages.js',
-      'scripts/primordial.js',
-      'scripts/primeCalculatorTask.js',
-      'scripts/app.js',
+      'scripts/**/*.js',
       '../test/unit/**/*.js'
     ],
     basePath: '../app',

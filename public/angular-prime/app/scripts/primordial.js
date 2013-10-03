@@ -19,25 +19,11 @@ angular.module("app.services", ["ngResource"])
                 number = NumberService.get(function() {
                     callback(number.number);
                 });
-
-                //$.ajax('/number', {
-                //    dataType:'json',
-                //    success:function(data) {
-                //            callback(data.number);
-                //    },
-                //    error:  err
-                //});
             }
 
             function reportResult(result, callback) {
                 number.isPrime = result.isPrime;
                 number.$save(callback);
-                //$.ajax('/number', {
-                //    type:'POST',
-                //    contentType:'application/json',
-                //    data: JSON.stringify(result),
-                //    success: callback
-                //});
             }
 
             function calculate(number) {
@@ -52,7 +38,7 @@ angular.module("app.services", ["ngResource"])
             });
 
             function next() {
-                if (!keepGoing) options.finish();        
+                if (!keepGoing) (options.finish||function(){})();        
                 else fetchNumber(options.finish||function(){}, calculate);
             }
 
@@ -67,6 +53,35 @@ angular.module("app.services", ["ngResource"])
                 start: start
             };
         };
-    });
 
+    })
+
+    .factory("Stats", function() {
+        return function($scope) {
+
+            var worker = new Worker('./scripts/statsCalculatorTask.js');
+            worker.addEventListener('message', function(event){
+                lastPublishedStats = event.data;
+                var secondsSinceStart = lastPublishedStats.thresholds.all.length;
+                var numPerSec = lastPublishedStats.thresholds.all[Math.max(secondsSinceStart-2,0)];
+                var avg = Math.round(lastPublishedStats.count/secondsSinceStart);
+                $scope.$broadcast("statsUpdate", numPerSec, avg); 
+            });
+    
+            return {
+                start: function() {
+                    worker.postMessage({'operation':'start'});
+                },
+                end: function(dataHandler) {
+                    worker.addEventListener('message', dataHandler);
+                    worker.postMessage({'operation':'stop'});
+                },
+                log: function(data) {
+                    worker.postMessage({'operation':'log',
+                                        'data' : data});
+                }
+            };
+        };
+    })
+;
 

@@ -8,7 +8,7 @@ angular.module('myApp', ['ngRoute', 'app.homePages', 'app.statsPages'])
           controller : 'HomeCtrl',
           templateUrl : TPL_PATH + '/home.html'
         })
-        .when('#/stats', {
+        .when('/stats', {
             controller: 'StatsCtrl',
             templateUrl: TPL_PATH + '/stats.html'
         });

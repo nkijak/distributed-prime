@@ -74,6 +74,7 @@ module.exports = function(grunt) {
           'lib/angular-1.2.0-rc.2/angular-resource.js',
           'app/scripts/homePages.js',
           'app/scripts/statPages.js',
+          'app/scripts/directives/gauges.js',
           'app/scripts/app.js',
           'app/scripts/primordial.js'
         ]
