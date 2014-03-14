@@ -1,4 +1,4 @@
-doctype 5
+doctype html
 html(lang="en")
     head
         title= 'Primordial Stats'
@@ -38,7 +38,7 @@ html(lang="en")
                             th Total Primes Found
                             th Time
                         tbody
-        script(type='text/javascript')
+        script(type='text/javascript').
             var stats = [0,0,0,0,0];
             $(function() {
                 var socket = io.connect('http://localhost/monitor');
