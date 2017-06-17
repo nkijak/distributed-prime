@@ -1,0 +1,10 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports: 
+    - "3010:3010"
+    links:
+    - redis
+  redis:
+    image: redis

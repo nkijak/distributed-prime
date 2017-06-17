@@ -1,5 +1,5 @@
 var CUTOFF_VALUE = 10000000;
-var redis 	= require('redis').createClient(),
+var redis 	= require('redis').createClient(6379, "redis"),
     EventEmitter   = require('events').EventEmitter,
     sys = require('sys');
 
